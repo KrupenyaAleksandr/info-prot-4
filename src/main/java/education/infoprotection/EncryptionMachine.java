@@ -1,5 +1,9 @@
 package education.infoprotection;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,10 @@ public class EncryptionMachine {
             makeGamma();
         }
 
+        printGammaBinary();
+        printGammaString();
+        printGammaToFile();
+
         byte[] messageBlock;
         byte[] gammaBlock;
         byte[] encryptedBlock;
@@ -51,7 +59,9 @@ public class EncryptionMachine {
             }
         }
 
-        printEncrypted();
+        printEncryptedBinary();
+        printEncryptedString();
+        printEncryptedToFile();
         return res;
     }
 
@@ -107,23 +117,77 @@ public class EncryptionMachine {
         return result;
     }
 
-    //TODO
-    private void printEncrypted() {
-        System.out.println("ENCRYPTED BINARY");
+    private void printEncryptedBinary() {
+        System.out.println("\nENCRYPTED BINARY\n");
         for (byte[] bytes : encryptedBlocks) {
-            System.out.println(bytes.toString());
+            for (byte b : bytes) {
+                System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
+            }
+            System.out.println();
         }
     }
 
-    private void printGamma() {
+    private void printEncryptedString() {
+        System.out.println("\nENCRYPTED STRING\n");
+        for (byte[] bytes : encryptedBlocks) {
+                System.out.println(new String(bytes));
+        }
+    }
 
+    private void printGammaBinary() {
+        System.out.println("\nGAMMA BINARY\n");
+        for (byte[] bytes : gammaBlocks) {
+            for (byte b : bytes) {
+                System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
+            }
+            System.out.println();
+        }
+    }
+
+    private void printGammaString() {
+        System.out.println("\nGAMMA STRING\n");
+        for (byte[] bytes : gammaBlocks) {
+            System.out.println(new String(bytes));
+        }
     }
 
     private void printGammaToFile() {
+        try (FileOutputStream fileOutputStream = new FileOutputStream("gamma-binary.bin")){
+            for (byte[] bytes : gammaBlocks) {
+                fileOutputStream.write(bytes);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
+        try (FileWriter fileWriter = new FileWriter("gamma-text.txt")) {
+            for (byte[] bytes : gammaBlocks) {
+                fileWriter.write(new String(bytes));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void printEncryptedToFile() {
+        try (FileOutputStream fileOutputStream = new FileOutputStream("encrypted-binary.bin")){
+            for (byte[] bytes : encryptedBlocks) {
+                fileOutputStream.write(bytes);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
+        try (FileWriter fileWriter = new FileWriter("encrypted-text.txt")) {
+            for (byte[] bytes : encryptedBlocks) {
+                fileWriter.write(new String(bytes));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

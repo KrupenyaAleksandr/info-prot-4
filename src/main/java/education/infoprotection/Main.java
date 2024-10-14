@@ -26,11 +26,12 @@ public class Main {
                 "processes, technology is becoming an integral part of our existence.";
         String msg2 = getMessage();
         byte[] originalBytes = msg.getBytes(StandardCharsets.UTF_8);
-        byte[] encryptedBytes = encryptionMachine.encrypt(msg.getBytes(StandardCharsets.UTF_8),BigInteger.ONE);
-        System.out.println(new String(encryptedBytes, StandardCharsets.UTF_8));
-        byte[] decryptedBytes = encryptionMachine.encrypt(encryptedBytes, BigInteger.ONE);
-        System.out.println(new String(decryptedBytes, StandardCharsets.UTF_8));
-        return;
+        encryptionMachine.encrypt(msg.getBytes(StandardCharsets.UTF_8),BigInteger.ONE);
+/*        try {
+            encryptionMachine.encrypt(readBytesFromFile(), BigInteger.ONE);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
     }
 
     public static String getMessage() {
@@ -40,5 +41,9 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static byte[] readBytesFromFile() throws IOException {
+        return Files.readAllBytes(Paths.get("encrypted-binary.bin"));
     }
 }
