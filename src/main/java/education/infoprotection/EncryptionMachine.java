@@ -1,7 +1,6 @@
 package education.infoprotection;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,13 +8,17 @@ public class EncryptionMachine {
 
     CongruentialGenerator congruentialGenerator;
     BlumBlumShubMachine blumBlumShubMachine;
-    List<byte[]> messageBlocks = new ArrayList<>();
-    List<byte[]> gammaBlocks = new ArrayList<>();
+    List<byte[]> messageBlocks;
+    List<byte[]> gammaBlocks;
+    List<byte[]> encryptedBlocks;
     // в итоге надо не переводить зашифрованные блоки в стринг, а записать биты в файл, при
     // дешифровки вытаскивать биты и гаммировать
 
-    public String encrypt(String message, BigInteger start) {
-        splitStringToBlocks(message);
+    public byte[] encrypt(byte[] message, BigInteger start) {
+
+        messageBlocks = new ArrayList<>();
+        gammaBlocks = new ArrayList<>();
+        splitBytesToBlocks(message);
         congruentialGenerator = new CongruentialGenerator(start);
         blumBlumShubMachine = new BlumBlumShubMachine(new BigInteger("4000000007"),
                 new BigInteger("5000000009"));
@@ -27,7 +30,7 @@ public class EncryptionMachine {
         byte[] messageBlock;
         byte[] gammaBlock;
         byte[] encryptedBlock;
-        List<byte[]> encryptedBlocks = new ArrayList<>();
+        encryptedBlocks = new ArrayList<>();
         for (int i = 0; i < messageBlocks.size(); i++) {
             messageBlock = messageBlocks.get(i);
             gammaBlock = gammaBlocks.get(i);
@@ -41,41 +44,15 @@ public class EncryptionMachine {
             encryptedBlocks.add(encryptedBlock);
         }
 
-        encrypt(encryptedBlocks);
-        return convertToString(encryptedBlocks);
-    }
-
-    private void encrypt(List<byte[]> list) {
-        byte[] messageBlock;
-        byte[] gammaBlock;
-        byte[] encryptedBlock;
-        List<byte[]> encryptedBlocks = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            messageBlock = list.get(i);
-            gammaBlock = gammaBlocks.get(i);
-
-            encryptedBlock = new byte[messageBlock.length];
-
-            for (int j = 0; j < messageBlock.length; j++) {
-                encryptedBlock[j] = (byte) (messageBlock[j] ^ gammaBlock[j]);
+        byte[] res = new byte[encryptedBlocks.size() * encryptedBlocks.get(0).length];
+        for (int i = 0, k = 0; i < encryptedBlocks.size(); i++) {
+            for (int j = 0; j < encryptedBlocks.get(0).length; j++) {
+                res[k++] = encryptedBlocks.get(i)[j];
             }
-
-            encryptedBlocks.add(encryptedBlock);
         }
 
-        System.out.println(convertToString(encryptedBlocks));
-    }
-
-    public String convertToString(List<byte[]> byteBlocks) {
-        StringBuilder result = new StringBuilder();
-
-        // Цикл по каждому блоку байтов
-        for (byte[] block : byteBlocks) {
-            // Преобразуем байты в строку, используя кодировку UTF-8
-            result.append(new String(block, StandardCharsets.UTF_8));
-        }
-
-        return result.toString(); // Возвращаем объединенную строку
+        printEncrypted();
+        return res;
     }
 
     private void makeGamma() {
@@ -99,17 +76,15 @@ public class EncryptionMachine {
         congruentialGenerator.setState(highBits);
     }
 
-    private void splitStringToBlocks(String message) {
-        byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-
+    private void splitBytesToBlocks(byte[] message) {
         int blockSize = 8;
         int end;
         byte[] block;
-        for (int i = 0; i < messageBytes.length; i += blockSize) {
-            end = Math.min(messageBytes.length, i + blockSize);
+        for (int i = 0; i < message.length; i += blockSize) {
+            end = Math.min(message.length, i + blockSize);
             block = new byte[blockSize];
 
-            System.arraycopy(messageBytes, i, block, 0, end - i); // копируем блок байт из стринга
+            System.arraycopy(message, i, block, 0, end - i); // копируем блок байт из стринга
 
             if (end - i < blockSize) { // если не хватило, добавляем нули
                 for (int j = end - 1; j < blockSize; j++) {
@@ -130,5 +105,25 @@ public class EncryptionMachine {
                 Math.max(0, 8 - byteArray.length), Math.min(8, byteArray.length));
 
         return result;
+    }
+
+    //TODO
+    private void printEncrypted() {
+        System.out.println("ENCRYPTED BINARY");
+        for (byte[] bytes : encryptedBlocks) {
+            System.out.println(bytes.toString());
+        }
+    }
+
+    private void printGamma() {
+
+    }
+
+    private void printGammaToFile() {
+
+    }
+
+    private void printEncryptedToFile() {
+
     }
 }

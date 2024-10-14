@@ -8,17 +8,37 @@ package education.infoprotection;
     гаммирование текста, состоящего из символов 128-символьной кодовой таблицы.*/
 
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
         EncryptionMachine encryptionMachine = new EncryptionMachine();
-        String msg = encryptionMachine.encrypt("The advancement of technology has significantly transformed the way we live, " +
+        String msg = "The advancement of technology has significantly transformed the way we live, " +
                 "communicate, and work. In the modern world, the integration of artificial intelligence, machine learning, " +
                 "and automation into various industries has led to increased efficiency and productivity. As these technologies " +
                 "continue to evolve, they are not only reshaping business operations but also influencing our daily lives. " +
                 "From smart home devices that simplify household tasks to sophisticated algorithms that enhance decision-making " +
-                "processes, technology is becoming an integral part of our existence.", new BigInteger("1"));
+                "processes, technology is becoming an integral part of our existence.";
+        String msg2 = getMessage();
+        byte[] originalBytes = msg.getBytes(StandardCharsets.UTF_8);
+        byte[] encryptedBytes = encryptionMachine.encrypt(msg.getBytes(StandardCharsets.UTF_8),BigInteger.ONE);
+        System.out.println(new String(encryptedBytes, StandardCharsets.UTF_8));
+        byte[] decryptedBytes = encryptionMachine.encrypt(encryptedBytes, BigInteger.ONE);
+        System.out.println(new String(decryptedBytes, StandardCharsets.UTF_8));
         return;
+    }
+
+    public static String getMessage() {
+        Path filePath = Paths.get("original-text.txt");
+        try {
+            return Files.readString(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
