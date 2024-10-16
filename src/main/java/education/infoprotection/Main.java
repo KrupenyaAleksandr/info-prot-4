@@ -7,6 +7,13 @@ package education.infoprotection;
     числа в первую ступень (в качестве порождающего значения), и процесс циклически повторяется. Реализовать
     гаммирование текста, состоящего из символов 128-символьной кодовой таблицы.*/
 
+//6 (DES) 112 (хеш SHA256) 113 (хеш гост р 34.11-94) 23 (cast-256)
+
+// выводить каждые 7 чисел, и каждые 5 чисел гаммы в двоичном виде
+// взять текст на пару строк, чтобы на выводе можно было посмотреть
+// двоичный вид открытого текста, гамму, должно помещаться примерно на 2-3 строки
+// желательно выводить каждое число гаммы в двоичном виде при генерации чтобы
+// было проще
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -17,21 +24,14 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
+        BigInteger bg = new BigInteger("123456");
+        System.out.println("CONGRUENTIAL START INPUT: " + bg.toString());
         EncryptionMachine encryptionMachine = new EncryptionMachine();
-        String msg = "The advancement of technology has significantly transformed the way we live, " +
-                "communicate, and work. In the modern world, the integration of artificial intelligence, machine learning, " +
-                "and automation into various industries has led to increased efficiency and productivity. As these technologies " +
-                "continue to evolve, they are not only reshaping business operations but also influencing our daily lives. " +
-                "From smart home devices that simplify household tasks to sophisticated algorithms that enhance decision-making " +
-                "processes, technology is becoming an integral part of our existence.";
+        String msg = "The advancement of technology has significantly transformed the way Swe live, " +
+                "communicate, and work.";
         String msg2 = getMessage();
         byte[] originalBytes = msg.getBytes(StandardCharsets.UTF_8);
-        encryptionMachine.encrypt(msg.getBytes(StandardCharsets.UTF_8),BigInteger.ONE);
-/*        try {
-            encryptionMachine.encrypt(readBytesFromFile(), BigInteger.ONE);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
+        encryptionMachine.encrypt(msg.getBytes(StandardCharsets.UTF_8), bg);
     }
 
     public static String getMessage() {

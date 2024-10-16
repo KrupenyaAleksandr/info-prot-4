@@ -15,6 +15,7 @@ public class EncryptionMachine {
     List<byte[]> messageBlocks;
     List<byte[]> gammaBlocks;
     List<byte[]> encryptedBlocks;
+    int counter = 0;
     // в итоге надо не переводить зашифрованные блоки в стринг, а записать биты в файл, при
     // дешифровки вытаскивать биты и гаммировать
 
@@ -66,24 +67,37 @@ public class EncryptionMachine {
     }
 
     private void makeGamma() {
+        System.out.println("ITERATION: " + counter);
+        int congrCount = 0;
         BigInteger sum = new BigInteger("0");
+        BigInteger nextCongr = new BigInteger("0");
         for (int i = 0; i < 7; i++) { // собираем сумму
-            sum = sum.add(congruentialGenerator.next());
+            nextCongr = congruentialGenerator.next();
+            sum = sum.add(nextCongr);
+            System.out.println("CONGRUENTIAL STEP " + (congrCount + 1) + ", NUMBER: " + nextCongr);
+            congrCount++;
         }
 
+        System.out.println("BLUMBLUMSHUB INPUT: " + sum.toString());
         blumBlumShubMachine.setState(sum);
 
         BigInteger bigInteger = new BigInteger("0");
+        int bbsCount = 0;
         for (int i = 0; i < 5; i++) { //собираем гамму
             bigInteger = blumBlumShubMachine.next();
+            System.out.println("BLUMBLUMSHUB STEP " + (bbsCount + 1) + ", NUMBER: " + bigInteger);
             gammaBlocks.add(toByteArray64(bigInteger));
+            bbsCount++;
         }
 
         // берём 20 бит и вычитаем один
         BigInteger mask = BigInteger.valueOf((1L << 20) - 1);
         // инвертируем
         BigInteger highBits = bigInteger.shiftRight(bigInteger.bitLength() - 20).and(mask);
+        System.out.println("CONGRUENTIAL ITERATION: "
+                + counter + ", NEW INPUT: " + highBits.toString());
         congruentialGenerator.setState(highBits);
+        counter++;
     }
 
     private void splitBytesToBlocks(byte[] message) {
@@ -114,6 +128,10 @@ public class EncryptionMachine {
         System.arraycopy(byteArray, Math.max(0, byteArray.length - 8), result,
                 Math.max(0, 8 - byteArray.length), Math.min(8, byteArray.length));
 
+        for (byte b : result) {
+            System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
+        }
+        System.out.println();
         return result;
     }
 
@@ -130,8 +148,9 @@ public class EncryptionMachine {
     private void printEncryptedString() {
         System.out.println("\nENCRYPTED STRING\n");
         for (byte[] bytes : encryptedBlocks) {
-                System.out.println(new String(bytes));
+                System.out.print(new String(bytes));
         }
+        System.out.println();
     }
 
     private void printGammaBinary() {
@@ -147,8 +166,9 @@ public class EncryptionMachine {
     private void printGammaString() {
         System.out.println("\nGAMMA STRING\n");
         for (byte[] bytes : gammaBlocks) {
-            System.out.println(new String(bytes));
+            System.out.print(new String(bytes));
         }
+        System.out.println();
     }
 
     private void printGammaToFile() {
